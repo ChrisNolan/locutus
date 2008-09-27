@@ -15,9 +15,47 @@
     'Superman Returns' => 5.0,
     'The Night Listener' => 3.0,
     'You, Me and Dupree' => 3.5
+  },
+  'Michael Phillips' => {
+    'Lady in the Water' => 2.5,
+    'Snakes on a Plane' => 3.0,
+    'Superman Returns' => 3.5,
+    'The Night Listener' => 4.0
+  },
+  'Claudia Puig' => {
+    'Snakes on a Plane' => 3.5,
+    'Just My Luck' => 3.0,
+    'The Night Listener' => 4.5,
+    'Superman Returns' => 4.0,
+    'You, Me and Dupree' => 2.5
+  },
+  'Mick LaSalle' => {
+    'Lady in the Water' => 3.0,
+    'Snakes on a Plane' => 4.0,
+    'Just My Luck' => 2.0,
+    'Superman Returns' => 3.0,
+    'The Night Listener' => 3.0,
+    'You, Me and Dupree' => 2.0
+  },
+  'Jack Matthews' => {
+    'Lady in the Water' => 3.0,
+    'Snakes on a Plane' => 4.0,
+    'The Night Listener' => 3.0,
+    'Superman Returns' => 5.0,
+    'You, Me and Dupree' => 3.5
+  },
+  'Toby' => {
+    'Snakes on a Plane' => 4.5,
+    'You, Me and Dupree' => 1.0,
+    'Superman Returns' => 4.0
+  },
+  'Chris Nolan.ca' => {
+    'Lady in the Water' => 3.5,
+    'Snakes on a Plane' => 0.01, # Hmmm... if I comment out this recommendation, then Toby & I are a 1.0 match.  is that a good thing?  We just have 2 shared items then but they aren't equal... look into later I guess
+    'Superman Returns' => 4.0,
+    'You, Me and Dupree' => 3.75
   }
 }
-@critics['Toby']={'Snakes on a Plane'=>4.5}
 
 # page 10 -- simple Euclidean Distance
 Math.sqrt((5-4)**2 + (4-1)**2)
@@ -53,6 +91,7 @@ def simularity_distance(preferences, person1, person2)
   return 1/(1 + Math.sqrt(sum_of_squares))
 end
 
+print "SimularityDistance: "
 puts simularity_distance(@critics, 'Lisa Rose', 'Gene Seymour')
 
 # Pearson Correlation from page 13
@@ -83,6 +122,7 @@ def simularity_pearson(preferences, person1, person2)
   den.zero? ? 0 : num/den
 end
 
+print 'SimularityPearson: '
 puts simularity_pearson(@critics, 'Lisa Rose', 'Gene Seymour')
 
 # # pseudocode for Pearson Correlation from wikipedia
@@ -106,3 +146,19 @@ puts simularity_pearson(@critics, 'Lisa Rose', 'Gene Seymour')
 #  pop_sd_y = sqrt( sum_sq_y / N )
 #  cov_x_y = sum_coproduct / N
 #  correlation = cov_x_y / (pop_sd_x * pop_sd_y)
+
+# See other Metric functions @ http://en.wikipedia.org/wiki/Metric_(mathematics)
+
+# Ranking the Critics -- page 14
+
+# Returns the best matches for person from the preferences
+# Number of results and similariy funcation are optional params
+def top_matches(preferences, person, n=5, similarity=:simularity_pearson)
+  scores = preferences.keys.collect {|other_person|
+    [send(similarity, preferences, person, other_person), other_person] unless person == other_person
+  }.compact.sort.reverse[0...n]
+end
+
+puts 'TopMatches: '
+puts "\tToby:\t\t#{top_matches(@critics, 'Toby', 3).inspect}"
+puts "\tChris Nolan.ca:\t#{top_matches(@critics, 'Chris Nolan.ca', 3).inspect}" # Note here I get some negatives too -- that means we're dis-similar
