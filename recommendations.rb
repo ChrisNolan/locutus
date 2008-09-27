@@ -162,3 +162,37 @@ end
 puts 'TopMatches: '
 puts "\tToby:\t\t#{top_matches(@critics, 'Toby', 3).inspect}"
 puts "\tChris Nolan.ca:\t#{top_matches(@critics, 'Chris Nolan.ca', 3).inspect}" # Note here I get some negatives too -- that means we're dis-similar
+
+# page 16 - Get Recommendations
+
+# Gets recommendations for a person by using a weighted average of every other user's rankings
+def get_recommendations(preferences, person, similarity=:simularity_pearson)
+  totals = {}
+  sim_sums = {}
+  for other_person in preferences.keys
+    simularity_to_other_person = send(similarity, preferences, person, other_person) unless person == other_person
+    
+    # ignore scores of zero or lower
+    next if simularity_to_other_person.nil? or simularity_to_other_person <= 0
+    
+    for item in preferences[other_person].keys
+      # only score movies I haven't seen or rated yet
+      if !preferences[person].keys.include?(item) or preferences[person][item] == 0
+        totals[item] = (totals[item] || 0) + preferences[other_person][item] * simularity_to_other_person
+        sim_sums[item] = (sim_sums[item] || 0) + simularity_to_other_person
+      end
+    end
+    
+  end
+  # Create the normalized list
+  rankings = totals.collect {|item, total|
+    [(total/sim_sums[item]), item]
+  }.sort.reverse
+end
+
+puts "\n\nRecommendations for Toby: "
+puts "\tToby:\t\t#{get_recommendations(@critics, 'Toby').inspect}"
+puts "\tToby:\t\t#{get_recommendations(@critics, 'Toby', :simularity_distance).inspect}"
+puts "\n\nRecommendations for Chris Nolan.ca: "
+puts "\tChris Nolan.ca:\t#{get_recommendations(@critics, 'Chris Nolan.ca').inspect}"
+puts "\tChris Nolan.ca:\t#{get_recommendations(@critics, 'Chris Nolan.ca', :simularity_distance).inspect}"
