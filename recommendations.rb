@@ -196,3 +196,24 @@ puts "\tToby:\t\t#{get_recommendations(@critics, 'Toby', :simularity_distance).i
 puts "\n\nRecommendations for Chris Nolan.ca: "
 puts "\tChris Nolan.ca:\t#{get_recommendations(@critics, 'Chris Nolan.ca').inspect}"
 puts "\tChris Nolan.ca:\t#{get_recommendations(@critics, 'Chris Nolan.ca', :simularity_distance).inspect}"
+
+# Matching Products page 17
+
+# swap the critic with the movie so it's a list of movies and each person's ranking
+def transform_preferences(preferences)
+  result = {}
+  for person in preferences.keys
+    for item in preferences[person].keys
+      result[item] = {} unless result[item]
+      result[item].merge!(person => preferences[person][item])
+    end
+  end
+  result
+end
+@movies = transform_preferences @critics
+
+puts "\n\nTop Matches for 'Superman Returns':" 
+puts top_matches(@movies, 'Superman Returns').inspect
+
+puts "\n\nRecommended Critic for 'Just My Luck':" 
+puts get_recommendations(@movies, 'Just My Luck').inspect
